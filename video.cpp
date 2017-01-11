@@ -16,7 +16,7 @@ using namespace std;
 using namespace cv;
 
 #define HOST_IP "193.226.12.217"
-#define PORT "20232"
+#define PORT "20231"
 //#define BUFF "f,s,b,s"
 
 
@@ -29,40 +29,40 @@ int S_MAX = 256;
 int V_MIN = 0;
 int V_MAX = 256;
 
-#define H_MIN_B 79   //blue
-#define H_MAX_B 102
-#define S_MIN_B 196
+#define H_MIN_B 50   //blue
+#define H_MAX_B 111
+#define S_MIN_B 208
 #define S_MAX_B 256
-#define V_MIN_B 106
+#define V_MIN_B 99
 #define V_MAX_B 256
 
 #define H_MIN_R 0   //red
-#define H_MAX_R 255
-#define S_MIN_R 69
-#define S_MAX_R 221
-#define V_MIN_R 244
+#define H_MAX_R 29
+#define S_MIN_R 221
+#define S_MAX_R 256
+#define V_MIN_R 190
 #define V_MAX_R 256
 
-#define H_MIN_Y 59   //yellow
-#define H_MAX_Y 67
-#define S_MIN_Y 76
-#define S_MAX_Y 152
-#define V_MIN_Y 0
+#define H_MIN_Y 16   //yellow
+#define H_MAX_Y 77
+#define S_MIN_Y 227
+#define S_MAX_Y 256
+#define V_MIN_Y 184
 #define V_MAX_Y 256
 
-#define H_MIN_G 35   //green
-#define H_MAX_G 86
-#define S_MIN_G 140
+#define H_MIN_G 44   //green
+#define H_MAX_G 80
+#define S_MIN_G 244
 #define S_MAX_G 256
-#define V_MIN_G 55
+#define V_MIN_G 57
 #define V_MAX_G 256
 
 #define H_MIN_BL 0   //black
-#define H_MAX_BL 179
+#define H_MAX_BL 60   //179
 #define S_MIN_BL 0
-#define S_MAX_BL 50
+#define S_MAX_BL 21    //50
 #define V_MIN_BL 0
-#define V_MAX_BL 100
+#define V_MAX_BL 256    //100
 
 int red_x,red_y,blue_x,blue_y,blk_x,blk_y,yel_x,yel_y;
 
@@ -271,20 +271,63 @@ int socket(){
 char buff[256];
 void see_enemy(int x1,int y1,int x2,int y2,int x3,int y3){
 	bzero(buff,256);
-	/*if(x1==x2){ //daca "punctul de orientare" e pe aceeasi axa x cu robotul meu
-		if(y1<y2)
-			if(y2<y3) //cu spatele la inamic
-				strcpy(buff,"r,s");
-			else // get close to him
-				if(y2==y3)
-					strcpy(buff,"l,s");
-				else
-					strcpy(buff,"f,s");
-	*/
+		  if(y2<y3){ //sunt in jumatatea superioara
+        printf("SUS");
+        if(y1<y2) //orientat in sus
+          //strcpy(buff,"r,s,r,s,f,s");
+          strcpy(buff,"r,s");
+        else if(x1>x2) //orientat la dreapta
+                //strcpy(buff,"r,s,f,s");
+                strcpy(buff,"r,s");
+              else if(x1<x2) //orientat la stanga
+                      //strcpy(buff,"l,s,f,s");
+                      strcpy(buff,"l,s");
+                      else if(y1>y2) //orientat in jos
+                          //strcpy(buff,"f,s");
+                          strcpy(buff,"f,s");
+                      
+      }  
+      else if(y2>y3){ //sunt in jumatatea inferioara
+        printf("JOS");
+          if(y1<y2) //orientat in sus
+          strcpy(buff,"f,s");
+        else if(x1>x2) //orientat la dreapta
+                strcpy(buff,"l,s,f,s");
+              else if(x1<x2) //orientat la stanga
+                      strcpy(buff,"r,s,f,s");
+                      else if(y1>y2) //orientat in jos
+                          strcpy(buff,"r,s,r,s,f,s");
+        }
+        else{ //suntem pe aceeasi axa y
+            if(x2>x3){ //inamic in stanga mea
+            printf("STANGA");
+              if(y1<y2) //orientat in sus
+          strcpy(buff,"l,s,f,s");
+        else if(x1>x2) //orientat la dreapta
+                strcpy(buff,"r,s,r,s,f,s");
+              else if(x1<x2) //orientat la stanga
+                      strcpy(buff,"f,s");
+                      else if(y1>y2) //orientat in jos
+                          strcpy(buff,"r,s,f,s");
+            }
+            else if(x2<x3){ //inamic in dreapta mea
+            printf("DREAPTA");
+              if(y1<y2) //orientat in sus
+          strcpy(buff,"r,s,f,s");
+        else if(x1>x2) //orientat la dreapta
+                strcpy(buff,"f,s");
+              else if(x1<x2) //orientat la stanga
+                      strcpy(buff,"r,s,r,s,f,s");
+                      else if(y1>y2) //orientat in jos
+                          strcpy(buff,"l,s,f,s");
+            }
+        }
+			  
+	/*
 	while((x2!=x3 && x1!=x3) || (y2!=y3 && y1!=y3)){
 		strcpy(buff,"r,s");
 	}
-	strcpy(buff,"f,s,f,s,f,s");
+	strcpy(buff,"f,s,f,s,f,s");*/
 				
 }
 int r=40;
@@ -340,7 +383,6 @@ int main(int argc, char* argv[])
 		cvtColor(cameraFeed, HSV, COLOR_BGR2HSV);
 		//filter HSV image between values and store filtered image to
 		//threshold matrix
-
 
 	//for black color = ring
 inRange(HSV, Scalar(H_MIN_BL, S_MIN_BL, V_MIN_BL), Scalar(H_MAX_BL, S_MAX_BL, V_MAX_BL), threshold);
@@ -403,6 +445,17 @@ inRange(HSV, Scalar(H_MIN_Y, S_MIN_Y, V_MIN_Y), Scalar(H_MAX_Y, S_MAX_Y, V_MAX_Y
 
 		blue_x=x;
 		blue_y=y;
+   
+   /*inRange(HSV, Scalar(H_MIN, S_MIN, V_MIN), Scalar(H_MAX, S_MAX, V_MAX), threshold);
+		//perform morphological operations on thresholded image to eliminate noise
+		//and emphasize the filtered object(s)
+		if (useMorphOps)
+			morphOps(threshold);
+		//pass in thresholded frame to our object tracking function
+		//this function will return the x and y coordinates of the
+		//filtered object
+		if (trackObjects)
+			trackFilteredObject(x, y, threshold, cameraFeed);*/
 		//show frames
 		imshow(windowName2, threshold);
 		imshow(windowName, cameraFeed);
